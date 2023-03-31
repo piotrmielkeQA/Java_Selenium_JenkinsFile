@@ -1,25 +1,28 @@
+ // parameters {
+           // string defaultValue: 'main', name: 'BRANCH', trim: true
+      //  }
+
+
+
 pipeline {
     agent any
-    parameters {
-            string defaultValue: 'main', name: 'BRANCH', trim: true
-        }
-
     stages {
-        stage('Git checkout') {
+        stage('Build test code') {
             steps {
-                git branch: '${BRANCH}', url: 'https://github.com/piotrmielkeQA/Java_Selenium_JenkinsFile.git'
+                sh 'mvn clean install -DskipTests'
             }
-
-        stage('Run tests') {
-                    steps {
-                        sh: 'mvn clean test'
-                    }
+        }
+        stage('Execute test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('Generate HTML report') {
+            steps {
+                script {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: '', useWrapperFileDirectly: true])
                 }
-        stage('Generate reports tests') {
-                    steps {
-                        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: '', useWrapperFileDirectly: true])
-                    }
-                }
+            }
         }
     }
 }
